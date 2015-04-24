@@ -9,26 +9,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-
 import com.saucelabs.junit.ConcurrentParameterized;
 import com.saucelabs.junit.SauceOnDemandTestWatcher;
-
 import java.net.URL;
 import java.util.LinkedList;
-
-import static org.junit.Assert.assertEquals;
-
 import com.saucelabs.common.SauceOnDemandSessionIdProvider;
-
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 
 /**
- * Demonstrates how to write a JUnit test that runs tests against Sauce Labs using multiple browsers in parallel.
+ * Demonstrates how to write a JUnit test that runs tests against Sauce Labs using multiple emulators in parallel.
  * <p/>
  * The test also includes the {@link SauceOnDemandTestWatcher} which will invoke the Sauce REST API to mark
  * the test as passed or failed.
@@ -51,27 +43,21 @@ public class SampleSauceTest implements SauceOnDemandSessionIdProvider {
     public SauceOnDemandTestWatcher resultReportingTestWatcher = new SauceOnDemandTestWatcher(this, authentication);
 
     /**
-     * Represents the browser to be used as part of the test run.
+     * Represents the platform to be used as part of the test run (i.e. Android).
      */
     private String platformName;
     /**
-     * Represents the operating system to be used as part of the test run.
+     * Represents the device name to be used as part of the test run. (i.e. Android Emulator, Google Nexus 7 HD Emulator)
      */
     private String deviceName;
     /**
-     * Represents the version of the browser to be used as part of the test run.
+     * Represents the version of the platform to be used as part of the test run. (i.e. 4.3)
      */
     private String platformVersion;
     /**
-     * Represents the deviceName of mobile device
+     * Location of the app
      */
     private String app;
-    /**
-     * Represents the device-orientation of mobile device
-     */
-    private String appPackage;
-
-    private String appActivity;
     /**
      * Instance variable which contains the Sauce Job Id.
      */
@@ -86,38 +72,33 @@ public class SampleSauceTest implements SauceOnDemandSessionIdProvider {
      * Constructs a new instance of the test.  The constructor requires three string parameters, which represent the operating
      * system, version and browser to be used when launching a Sauce VM.  The order of the parameters should be the same
      * as that of the elements within the {@link #browsersStrings()} method.
-     * @param os
-     * @param version
-     * @param browser
+     * @param platformName
      * @param deviceName
-     * @param deviceOrientation
+     * @param platformVersion
+     * @param app
      */
 
-    public SampleSauceTest(String platformName, String deviceName, String platformVersion, String app, String appPackage, String appActivity) {
+    public SampleSauceTest(String platformName, String deviceName, String platformVersion, String app) {
         super();
         this.platformName = platformName;
         this.deviceName = deviceName;
         this.platformVersion = platformVersion;
         this.app = app;
-        this.appPackage = appPackage;
-        this.appActivity = appActivity;
     }
 
     /**
-     * @return a LinkedList containing String arrays representing the browser combinations the test should be run against. The values
-     * in the String array are used as part of the invocation of the test constructor
+     * @return a LinkedList containing String arrays representing the mobile device emulator combinations the test should be run against.
+     * The values in the String array are used as part of the invocation of the test constructor
      */
     @ConcurrentParameterized.Parameters
     public static LinkedList browsersStrings() {
         LinkedList browsers = new LinkedList();
 
-        browsers.add(new String[]{"Android", "Android Emulator", "4.3", "http://saucelabs.com/example_files/ContactManager.apk", "com.example.android.contactmanager", ".ContactManager"});
-        browsers.add(new String[]{"Android", "Google Nexus 7 HD Emulator", "4.4", "http://saucelabs.com/example_files/ContactManager.apk", "com.example.android.contactmanager", ".ContactManager"});
-
+        browsers.add(new String[]{"Android", "Android Emulator", "4.3", "http://saucelabs.com/example_files/ContactManager.apk"});
+        browsers.add(new String[]{"Android", "Google Nexus 7 HD Emulator", "4.4", "http://saucelabs.com/example_files/ContactManager.apk"});
 
         return browsers;
     }
-
 
     /**
      * Constructs a new {@link RemoteWebDriver} instance which is configured to use the capabilities defined by the {@link #browser},
@@ -128,17 +109,12 @@ public class SampleSauceTest implements SauceOnDemandSessionIdProvider {
      */
     @Before
     public void setUp() throws Exception {
-    	DesiredCapabilities capabilities = new DesiredCapabilities();
+        DesiredCapabilities capabilities = new DesiredCapabilities();
 
-    	capabilities.setCapability("deviceName", deviceName);
+        capabilities.setCapability("platformName", platformName);
+        capabilities.setCapability("deviceName", deviceName);
         capabilities.setCapability("platformVersion", platformVersion);
         capabilities.setCapability("app", app);
-        capabilities.setCapability("appPackage", appPackage);
-        capabilities.setCapability("appActivity", appActivity);
-
-        if (platformName != null) {
-        	capabilities.setCapability("platformName", platformName);
-        }
 
         capabilities.setCapability("name", "Parallel Testing Appium");
         this.driver = new RemoteWebDriver(
@@ -149,12 +125,15 @@ public class SampleSauceTest implements SauceOnDemandSessionIdProvider {
     }
 
     /**
-     * Runs a simple test verifying the title of the americanexpress.com home page.
+     * Runs a simple test that clicks the add contact button
      * @throws Exception
      */
     @Test
-    public void verifyTitleTest() throws Exception {
-        assertEquals("America", "America");
+    public void sampleTest() throws Exception {
+        WebElement el = driver.findElement(By.name("Add Contact"));
+        el.click();
+
+        // TODO: verify add contact click worked
     }
 
     /**
