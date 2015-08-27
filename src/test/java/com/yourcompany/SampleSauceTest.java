@@ -46,7 +46,11 @@ public class SampleSauceTest implements SauceOnDemandSessionIdProvider {
     @Rule
     public SauceOnDemandTestWatcher resultReportingTestWatcher = new SauceOnDemandTestWatcher(this, authentication);
     
-    @Rule public TestName name = new TestName();
+    @Rule public TestName name = new TestName() {
+        public String getMethodName() {
+        		return String.format("%s", super.getMethodName());
+        };
+    };
 
     /**
      * Represents the platform to be used as part of the test run (i.e. Android).
