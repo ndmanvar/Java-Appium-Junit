@@ -6,16 +6,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
 import com.saucelabs.junit.ConcurrentParameterized;
 import com.saucelabs.junit.SauceOnDemandTestWatcher;
+
 import java.net.URL;
 import java.util.LinkedList;
+
 import com.saucelabs.common.SauceOnDemandSessionIdProvider;
 
 
@@ -41,6 +45,12 @@ public class SampleSauceTest implements SauceOnDemandSessionIdProvider {
      */
     @Rule
     public SauceOnDemandTestWatcher resultReportingTestWatcher = new SauceOnDemandTestWatcher(this, authentication);
+    
+    @Rule public TestName name = new TestName() {
+        public String getMethodName() {
+        		return String.format("%s", super.getMethodName());
+        };
+    };
 
     /**
      * Represents the platform to be used as part of the test run (i.e. Android).
@@ -116,7 +126,8 @@ public class SampleSauceTest implements SauceOnDemandSessionIdProvider {
         capabilities.setCapability("platformVersion", platformVersion);
         capabilities.setCapability("app", app);
 
-        capabilities.setCapability("name", "Parallel Testing Appium");
+        capabilities.setCapability("name", name.getMethodName());
+        
         this.driver = new RemoteWebDriver(
                 new URL("http://" + authentication.getUsername() + ":" + authentication.getAccessKey() + "@ondemand.saucelabs.com:80/wd/hub"),
                 capabilities);
